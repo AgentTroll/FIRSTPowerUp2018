@@ -4,21 +4,20 @@ import org.usfirst.frc.team4131.robot.auto.Action;
 import org.usfirst.frc.team4131.robot.subsystem.ClawSubsystem;
 
 /*
- * Cube despense actions, end of auton
- * Release cube
- * Eject Cube
+ * Start of auton pneumatics actions
+ * Clamp cube
+ * Lower arm
  */
-public class PneumaticActionTwo implements Action{
+public class StartPnuematicAction implements Action{
 
 	ClawSubsystem claw;
 
-	public PneumaticActionTwo(ClawSubsystem claw) {
+	public StartPnuematicAction(ClawSubsystem claw) {
 		this.claw = claw;
 	}
 	
 	@Override
 	public void doAction() {
-		claw.release();
-		claw.pusherOut();
+		claw.clamp();
 	}
 }

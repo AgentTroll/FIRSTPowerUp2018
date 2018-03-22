@@ -15,157 +15,164 @@ import org.usfirst.frc.team4131.robot.ctl.DriveCtl;
 import static org.usfirst.frc.team4131.robot.Oi.sigl;
 import static org.usfirst.frc.team4131.robot.Oi.sigr;
 
+import org.usfirst.frc.team4131.robot.Robot;
+
 /**
  * The drive base subsystem, linking the 4 Talon SRX
  * controllers and their respective motors.
  */
 public class DriveBaseSubsystem extends Subsystem implements PIDSource {
 	private static final boolean IS_LEFT_MASTER = true;
-	
-    // Sensor constants
-    private static final int PID_IDX = 0;
-    private static final int SENSOR_TIMEOUT = 0;
 
-    // Drive fallback PID controller
-    private final DriveCtl ctl;
+	// Sensor constants
+	private static final int PID_IDX = 0;
+	private static final int SENSOR_TIMEOUT = 0;
 
-    // Physical drive mappings
-    private final TalonSRX left;
-    private final TalonSRX right;
+	// Drive fallback PID controller
+	private final DriveCtl ctl;
 
-    /**
-     * Creates and caches the motors used for the drive base
-     */
-    public DriveBaseSubsystem() {
-        this.ctl = new DriveCtl(this);
+	// Physical drive mappings
+	private final TalonSRX left;
+	private final TalonSRX right;
 
-        this.left = new TalonSRX(RobotMap.L1);
-        new TalonSRX(RobotMap.L2).follow(this.left);
+	/**
+	 * Creates and caches the motors used for the drive base
+	 */
+	public DriveBaseSubsystem() {
+		this.ctl = new DriveCtl(this);
 
-        this.right = new TalonSRX(RobotMap.R1);
-        new TalonSRX(RobotMap.R2).follow(this.right);
+		this.left = new TalonSRX(RobotMap.L1);
+		new TalonSRX(RobotMap.L2).follow(this.left);
 
-        this.setupEncoder();
-        this.reset();
-        this.ramp(0.3);
-    }
+		this.right = new TalonSRX(RobotMap.R1);
+		new TalonSRX(RobotMap.R2).follow(this.right);
 
-    @Override
-    protected void initDefaultCommand() {
-        this.setDefaultCommand(new MoveCommand(this));
-    }
+		this.setupEncoder();
+		this.reset();
+		this.ramp(0.3);
+	}
 
-    /**
-     * Obtains the controller used for moving a certain
-     * distance.
-     *
-     * @return the distance drive controller
-     */
-    public DriveCtl getCtl() {
-        return this.ctl;
-    }
+	@Override
+	protected void initDefaultCommand() {
+		this.setDefaultCommand(new MoveCommand(this));
+	}
 
-    // Talon setup methods ---------------------------------
+	/**
+	 * Obtains the controller used for moving a certain
+	 * distance.
+	 *
+	 * @return the distance drive controller
+	 */
+	public DriveCtl getCtl() {
+		return this.ctl;
+	}
 
-    /**
-     * Configures the selected sensor to the quadrature
-     * encoder on the left and right motors.
-     */
-    private void setupEncoder() {
-        ErrorCode code = ErrorCode.worstOne(this.left.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, PID_IDX, SENSOR_TIMEOUT),
-        		this.right.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, PID_IDX, SENSOR_TIMEOUT));
-        if (code.value != 0) {
-            DriverStation.reportError("Error occurred configuring quad encoders", false);
-        }
-    }
+	// Talon setup methods ---------------------------------
 
-    /**
-     * Resets the position indicated by the quadencoders to
-     * {@code 0}.
-     */
-    public void reset() {
-        ErrorCode code = ErrorCode.worstOne(this.left.setSelectedSensorPosition(0, PID_IDX, SENSOR_TIMEOUT),
-        		this.right.setSelectedSensorPosition(0, PID_IDX, SENSOR_TIMEOUT));
-        if (code.value != 0) {
-            DriverStation.reportError("Error occurred resetting quad encoders", false);
-        }
-    }
+	/**
+	 * Configures the selected sensor to the quadrature
+	 * encoder on the left and right motors.
+	 */
+	private void setupEncoder() {
+		ErrorCode code = ErrorCode.worstOne(this.left.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, PID_IDX, SENSOR_TIMEOUT),
+				this.right.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, PID_IDX, SENSOR_TIMEOUT));
+		if (code.value != 0) {
+			DriverStation.reportError("Error occurred configuring quad encoders", false);
+		}
+	}
 
-    /**
-     * Reduces ramping in order to allow teleop control to
-     * be more responsive.
-     * 
-     * @param ramp the ramp to set on the talons
-     */
-    public void ramp(double ramp) {
-        this.left.configOpenloopRamp(0.3, SENSOR_TIMEOUT);
-        this.right.configOpenloopRamp(0.3, SENSOR_TIMEOUT);
-    }
+	/**
+	 * Resets the position indicated by the quadencoders to
+	 * {@code 0}.
+	 */
+	public void reset() {
+		ErrorCode code = ErrorCode.worstOne(this.left.setSelectedSensorPosition(0, PID_IDX, SENSOR_TIMEOUT),
+				this.right.setSelectedSensorPosition(0, PID_IDX, SENSOR_TIMEOUT));
+		if (code.value != 0) {
+			DriverStation.reportError("Error occurred resetting quad encoders", false);
+		}
+	}
 
-    // Talon control ---------------------------------------
+	/**
+	 * Reduces ramping in order to allow teleop control to
+	 * be more responsive.
+	 * 
+	 * @param ramp the ramp to set on the talons
+	 */
+	public void ramp(double ramp) {
+		this.left.configOpenloopRamp(0.3, SENSOR_TIMEOUT);
+		this.right.configOpenloopRamp(0.3, SENSOR_TIMEOUT);
+	}
 
-    /**
-     * Changes the speed of the motors to the given
-     * constant output mode (-1 to 1).
-     *
-     * @param l the left motor speed
-     * @param r the right motor speed
-     */
-    public void doThrottle(double l, double r) {
-        this.left.set(ControlMode.PercentOutput, Math.pow((sigl() * l), 3));
-        this.right.set(ControlMode.PercentOutput, Math.pow((sigr() * r), 3));
-    }
+	// Talon control ---------------------------------------
 
-    /**
-     * Sets the throttle for the left motor.
-     *
-     * @param vel the throttle (-1 to 1)
-     */
-    public void setVelocityLeft(double vel) {
-        this.left.set(ControlMode.PercentOutput, sigl() * vel);
-    }
+	/**
+	 * Changes the speed of the motors to the given
+	 * constant output mode (-1 to 1).
+	 *
+	 * @param l the left motor speed
+	 * @param r the right motor speed
+	 */
+	public void doThrottle(double l, double r) {
+		if (!Robot.isClimberTop && !Robot.isClimberBottom) {
+			this.left.set(ControlMode.PercentOutput, Math.pow((sigl() * l), 3));
+			this.right.set(ControlMode.PercentOutput, Math.pow((sigr() * r), 3));
+		}else {
+			this.left.set(ControlMode.PercentOutput, Math.pow((sigl() * l), 7));
+			this.right.set(ControlMode.PercentOutput, Math.pow((sigr() * r), 7));
+		}
+	}
 
-    /**
-     * Sets the throttle for the right motor.
-     *
-     * @param vel the throttle (-1 to 1)
-     */
-    public void setVelocityRight(double vel) {
-        this.right.set(ControlMode.PercentOutput, sigr() * vel);
-    }
+	/**
+	 * Sets the throttle for the left motor.
+	 *
+	 * @param vel the throttle (-1 to 1)
+	 */
+	public void setVelocityLeft(double vel) {
+		this.left.set(ControlMode.PercentOutput, sigl() * vel);
+	}
 
-    // Sensor polling methods ------------------------------
-    // DO NOT use SensorCollection here
+	/**
+	 * Sets the throttle for the right motor.
+	 *
+	 * @param vel the throttle (-1 to 1)
+	 */
+	public void setVelocityRight(double vel) {
+		this.right.set(ControlMode.PercentOutput, sigr() * vel);
+	}
 
-    /**
-     * Obtains the tick count for the left encoder.
-     *
-     * @return the ticks since the last reset travelled by
-     * the left encoder
-     * 
-     * Originally right sensor position
-     */
-    public int getDist() {
-    	//System.err.println("left enc: " + this.left.getSelectedSensorPosition(PID_IDX) + " right enc: " + this.left.getSelectedSensorPosition(PID_IDX));
-    	
-        return IS_LEFT_MASTER ? this.left.getSelectedSensorPosition(PID_IDX) :
-        	this.right.getSelectedSensorPosition(PID_IDX);
-    }
+	// Sensor polling methods ------------------------------
+	// DO NOT use SensorCollection here
 
-    // PID Fallback source methods -------------------------
+	/**
+	 * Obtains the tick count for the left encoder.
+	 *
+	 * @return the ticks since the last reset travelled by
+	 * the left encoder
+	 * 
+	 * Originally right sensor position
+	 */
+	public int getDist() {
+		//System.err.println("left enc: " + this.left.getSelectedSensorPosition(PID_IDX) + " right enc: " + this.left.getSelectedSensorPosition(PID_IDX));
 
-    @Override
-    public PIDSourceType getPIDSourceType() {
-        return PIDSourceType.kDisplacement;
-    }
+		return IS_LEFT_MASTER ? this.left.getSelectedSensorPosition(PID_IDX) :
+			this.right.getSelectedSensorPosition(PID_IDX);
+	}
 
-    @Override
-    public void setPIDSourceType(PIDSourceType pidSource) {
-        throw new UnsupportedOperationException();
-    }
+	// PID Fallback source methods -------------------------
 
-    @Override
-    public double pidGet() {
-        return this.getDist();
-    }
+	@Override
+	public PIDSourceType getPIDSourceType() {
+		return PIDSourceType.kDisplacement;
+	}
+
+	@Override
+	public void setPIDSourceType(PIDSourceType pidSource) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public double pidGet() {
+		return this.getDist();
+	}
 }

@@ -2,6 +2,7 @@ package org.usfirst.frc.team4131.robot.subsystem;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Spark;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Subsystem;
 
 import org.usfirst.frc.team4131.robot.Robot;
@@ -33,14 +34,14 @@ public class ElevatorSubsystem extends Subsystem {
      * Raises the claw.
      */
     public void raise() {
-        this.motor.set(ControlMode.PercentOutput, -0.75);
+        this.motor.set(ControlMode.PercentOutput, -0.85);
     }
 
     /**
      * Lowers the claw.
      */
     public void lower() {
-        this.motor.set(ControlMode.PercentOutput, 0.4);
+        this.motor.set(ControlMode.PercentOutput, 0.45);
     }
 
     /**
@@ -52,7 +53,7 @@ public class ElevatorSubsystem extends Subsystem {
     }
     
     public void goToBottom() {
-    	this.stop();
+    	
     	while (Robot.isElevatorBottom) {
     		this.lower();
     	}
@@ -60,13 +61,17 @@ public class ElevatorSubsystem extends Subsystem {
     }
     
     public void goToTop() {
-    	/*this.stop();
-    	while (Robot.topElevatorSwitch.get()) {
-    		System.out.println("Still in loop");
-    		System.out.println(Robot.isElevatorTop);
+    	System.err.println("Climber going to top!");
+    	/*while (Robot.isElevatorBottom) {
+    		System.err.println("Elevator still in loop!");
     		this.raise();
     	}
     	System.out.println("DONE WOTH LOOP");
-    	this.stop();*/
+    	this.stop();
+    	*/
+    	
+    	  this.motor.set(ControlMode.PercentOutput, -0.5);
+    	  Timer.delay(5);
+    	  this.motor.set(ControlMode.PercentOutput, 0);
     }
 }

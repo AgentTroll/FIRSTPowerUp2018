@@ -47,10 +47,10 @@ public class Robot extends IterativeRobot {
     private final SendableChooser<Procedure> chooser = new SendableChooser<>();
 
     // Limit Switches
-    private final DigitalInput topClimberSwitch = new DigitalInput(2);
-    private final DigitalInput bottomClimberSwitch = new DigitalInput(3);
-    private final DigitalInput topElevatorSwitch = new DigitalInput(1);
-    private final DigitalInput bottomElevatorSwitch = new DigitalInput(0);
+    private final DigitalInput bottomElevatorSwitch = new DigitalInput(0);//true
+    private final DigitalInput topElevatorSwitch = new DigitalInput(1);//true
+    private final DigitalInput topClimberSwitch = new DigitalInput(2);//true
+    private final DigitalInput bottomClimberSwitch = new DigitalInput(3);//false
 
     // Subsystem stuff
     private SubsystemProvider provider;
@@ -81,12 +81,12 @@ public class Robot extends IterativeRobot {
 
         // Display auto procedures on dashboard
         this.chooser.addDefault("Left Right Baseline", new LeftRightBaseLine());
-        //this.chooser.addDefault("Left Right Baseline", new DriverSTation2ToBaseLine());
+        this.chooser.addDefault("Switch from front", new SwitchFromFront());
         this.chooser.addObject("DriverStation 2 to switch", new DriverStation2ToSwitch());
         /*this.chooser.addObject("LeftToSwitchOrScale", new LeftToSwitchOrScale());
         this.chooser.addObject("RightToSwitchOrScale", new RightToSwitchOrScale());
-        this.chooser.addObject("Encoder Calibration", new EncoderCalibration());
-        */SmartDashboard.putData("Auto Mode", this.chooser);
+        */this.chooser.addObject("testing", new Testing());
+        SmartDashboard.putData("Auto Mode", this.chooser);
         
         provider.getClaw().armUp();
         provider.getClaw().clamp();
